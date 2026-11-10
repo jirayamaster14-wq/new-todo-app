@@ -1,0 +1,267 @@
+import { useEffect, useState } from 'react';
+
+
+
+import {
+
+    db, collection, addDoc, onSnapshot, getDoc,
+
+    deleteDoc, doc,updateDoc
+
+} from '../Config/firebase'
+
+
+
+
+
+
+
+function Home() {
+
+
+
+
+
+  const [value, setValue] = useState("")
+
+  const [todos, setTodos] = useState([])
+
+  const [editId, setEditId] = useState(null)
+
+
+
+  useEffect(() => {
+
+
+
+    onSnapshot(collection(db, "todos"), (snapshot) => {
+
+
+
+      const todoList = snapshot.docs
+
+        .map((doc) => ({
+
+          id: doc.id,
+
+          ...doc.data()
+
+        }))
+
+        .filter((data) => data.todo)
+
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+
+
+
+      setTodos(todoList)
+
+
+
+    })
+
+
+
+  }, [])
+
+
+
+  const addText = async () => {
+
+
+
+    if (value.trim() === "") {
+
+      return
+
+    }
+
+
+
+    const docRef = await addDoc(collection(db, "todos"), {
+
+      todo: value,
+
+      country: "pakistan",
+
+      createdAt: Date.now()
+
+    })
+
+
+
+    console.log("Document ID:", docRef.id)
+
+
+
+    setValue("")
+
+  }
+
+
+
+  const deleteAll = async () => {
+
+
+
+    const snapshot = await getDocs(collection(db, "todos"))
+
+
+
+    snapshot.docs.map((data) => {
+
+      deleteDoc(doc(db, "todos", data.id))
+
+    })
+
+
+
+  }
+
+
+
+  const deleteTodo = async (id) => {
+
+    await deleteDoc(doc(db, "todos", id));
+
+    console.log(id);
+
+
+
+  }
+
+
+
+  const editTodo = (data) => {
+
+    setValue(data.todo)
+
+    setEditId(data.id)
+
+  }
+
+
+
+  const updateTodo = async () => {
+
+
+
+    await updateDoc(doc(db, "todos", editId), {
+
+      todo: value
+
+    })
+
+
+
+    setValue("")
+
+    setEditId(null)
+
+
+
+  }
+
+
+
+  return (
+
+    <div>
+
+
+
+      <h1>Home</h1>
+
+
+
+      <input
+
+        type="text"
+
+        value={value}
+
+        onChange={(e) => setValue(e.target.value)}
+
+        placeholder="Enter your todo"
+
+      />
+
+
+
+      {
+
+        editId ? (
+
+          <button onClick={updateTodo}>Update</button>
+
+        ) : (
+
+          <button onClick={addText}>Add</button>
+
+        )
+
+      }
+
+      <button onClick={deleteAll}>Delete All</button>
+
+
+
+      <ul>
+
+        {
+
+          todos.map((data) => {
+
+            return (
+
+              <li key={data.id}>
+
+
+
+                {data.todo}
+
+
+
+                <button onClick={() => editTodo(data)}>
+
+                  Edit
+
+                </button>
+
+
+
+                <button onClick={() => deleteTodo(data.id)}>
+
+                  Delete
+
+                </button>
+
+
+
+              </li>
+
+            )
+
+          })
+
+        }
+
+      </ul>
+
+
+
+    </div>
+
+  )
+
+
+
+
+
+ 
+
+}
+
+
+
+export default Home;
