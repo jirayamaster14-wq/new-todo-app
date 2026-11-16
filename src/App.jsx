@@ -1,11 +1,9 @@
 //  import { useState } from 'react';
 
 // import { isValidElement, useEffect, useMemo, useState } from "react"
-import { useState, useEffect } from "react";
+
 import { data } from "react-router-dom"
 import "./App.css"
-import Searchnavbar from './Searchnavbar'
-import Approuter from "./router";
 import Todotest from "./pages/todotest";
 
 // import './App.css'
